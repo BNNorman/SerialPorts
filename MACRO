@@ -1,0 +1,33 @@
+Sub GetComPorts()
+    Dim strComputer
+    Dim objWMIService
+    Dim colItems
+    Dim objItem
+
+    
+    For Row = 2 To 17
+        Cells(Row, "B").Value = "Not found"
+        Cells(Row, "C").Value = ""
+    Next
+    
+    strComputer = "."
+    
+    Set objWMIService = GetObject("winmgmts:\\" & strComputer & "\root\cimv2")
+    Set colItems = objWMIService.ExecQuery("Select * from Win32_PnPEntity")
+
+    For Each objItem In colItems
+        p = InStr(objItem.Caption, "(COM")
+        If p > 0 Then
+            thisPort = Mid(objItem.Caption, p + 4, 2)
+            If Right(thisPort, 1) = ")" Then
+                thisPort = Left(thisPort, Len(thisPort) - 1)
+            End If
+            Debug.Print ("Port=" & thisPort & " Status=" & objItem.Status)
+            
+            Cells(thisPort + 1, "b").Value = objItem.Status
+            Cells(thisPort + 1, "c").Value = objItem.Manufacturer
+            Debug.Print ("objName=" & objItem.Name & " Caption=" & objItem.Caption & " Manuf=" & objItem.Manufacturer & " Status=" & objItem.Status)
+        End If
+        
+    Next
+End Sub
